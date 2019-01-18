@@ -29,13 +29,13 @@ function tryRequire(target) {
 }
 
 // http://stackoverflow.com/a/27382838
-exports.fileExistsWithCaseSync = function fileExistsWithCaseSync(filepath, cacheSettings) {
+exports.fileExistsWithCaseSync = function fileExistsWithCaseSync(filepath, cacheSettings, strict) {
   // don't care if the FS is case-sensitive
   if (CASE_SENSITIVE_FS) return true
 
   // null means it resolved to a builtin
   if (filepath === null) return true
-  if (filepath.toLowerCase() === process.cwd().toLowerCase()) return true
+  if (filepath.toLowerCase() === process.cwd().toLowerCase() && !strict) return true
   const parsedPath = path.parse(filepath)
       , dir = parsedPath.dir
 
@@ -50,7 +50,7 @@ exports.fileExistsWithCaseSync = function fileExistsWithCaseSync(filepath, cache
     if (filenames.indexOf(parsedPath.base) === -1) {
       result = false
     } else {
-      result = fileExistsWithCaseSync(dir, cacheSettings)
+      result = fileExistsWithCaseSync(dir, cacheSettings, strict)
     }
   }
   fileExistsCache.set(filepath, result)

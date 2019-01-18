@@ -76,6 +76,22 @@ By default, this rule will report paths whose case do not match the underlying f
 const { default: x } = require('./foo') // reported if './foo' is actually './Foo' and caseSensitive: true
 ```
 
+#### `caseSensitiveStrict`
+
+`caseSensitive` option does not detect case for current working derectory, `caseSensitiveStrict` option allows to check `cwd` in resolved path. By default, the options is disabled.
+
+
+```js
+/*eslint import/no-unresolved: [2, { caseSensitiveStrict: true }]*/
+
+// Absolute paths
+import Foo from `/Users/fOo/bar/file.js` // reported, /Users/foo/bar/file.js
+import Foo from `d:/fOo/bar/file.js` // reported, d:/foo/bar/file.js
+
+// Relative paths, cwd is Users/foo/
+import Foo from `./../fOo/bar/file.js` // reported
+```
+
 ## When Not To Use It
 
 If you're using a module bundler other than Node or Webpack, you may end up with

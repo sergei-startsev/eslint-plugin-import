@@ -152,7 +152,11 @@ describe('resolve', function () {
   const caseDescribe = (!CASE_SENSITIVE_FS ? describe : describe.skip)
   caseDescribe('case sensitivity', function () {
     let file
-    const testContext = utils.testContext({ 'import/resolve': { 'extensions': ['.jsx'] }})
+    const testContext = utils.testContext({ 
+      'import/resolve': { 'extensions': ['.jsx'] },
+      'import/cache': { lifetime: 0 },
+    })
+    const testSettings = testContext.settings
     before('resolve', function () {
       file = resolve(
       // Note the case difference 'MyUncoolComponent' vs 'MyUnCoolComponent'
@@ -162,13 +166,18 @@ describe('resolve', function () {
       expect(file, 'path to ./jsx/MyUncoolComponent').to.exist
     })
     it('detects case does not match FS', function () {
-      expect(fileExistsWithCaseSync(file, ModuleCache.getSettings(testContext)))
+      expect(fileExistsWithCaseSync(file, testSettings))
         .to.be.false
     })
     it('detecting case does not include parent folder path (issue #720)', function () {
       const f = path.join(process.cwd().toUpperCase(), './tests/files/jsx/MyUnCoolComponent.jsx')
-      expect(fileExistsWithCaseSync(f, ModuleCache.getSettings(testContext), true))
+      expect(fileExistsWithCaseSync(f, testSettings))
         .to.be.true
+    })
+    it('detecting case should include parent folder path', function () {
+      const f = path.join(process.cwd().toUpperCase(), './tests/files/jsx/MyUnCoolComponent.jsx')
+      expect(fileExistsWithCaseSync(f, testSettings, true))
+        .to.be.false
     })
   })
 

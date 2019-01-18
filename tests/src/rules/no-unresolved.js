@@ -15,7 +15,7 @@ function runResolverTests(resolver) {
   function rest(specs) {
     specs.settings = Object.assign({},
       specs.settings,
-      { 'import/resolver': resolver }
+      { 'import/resolver': resolver, 'import/cache': { lifetime: 0 } }
     )
 
     return test(specs)
@@ -203,11 +203,20 @@ function runResolverTests(resolver) {
   })
 
   if (!CASE_SENSITIVE_FS) {
+    const relativePath = './tests/files/jsx/MyUnCoolComponent.jsx'
+    const cwd = process.cwd()
+    const mismatchedPath = path.join(cwd.toUpperCase(), relativePath).replace(/\\/g, '/')
+
     ruleTester.run('case sensitivity', rule, {
       valid: [
         rest({ // test with explicit flag
           code: 'import foo from "./jsx/MyUncoolComponent.jsx"',
           options: [{ caseSensitive: false }],
+        }),
+        // #1259 issue
+        rest({ // test with explicit flag
+          code: `import foo from "${mismatchedPath}"`,
+          options: [{ caseSensitive: true }],
         }),
       ],
 
@@ -220,6 +229,12 @@ function runResolverTests(resolver) {
           code: 'import foo from "./jsx/MyUncoolComponent.jsx"',
           options: [{ caseSensitive: true }],
           errors: [`Casing of ./jsx/MyUncoolComponent.jsx does not match the underlying filesystem.`],
+        }),
+        // #1259 issue
+        rest({ // test with explicit flag
+          code: `import foo from "${mismatchedPath}"`,
+          options: [{ caseSensitiveStrict: true }],
+          errors: [`Casing of ${mismatchedPath} does not match the underlying filesystem.`],
         }),
       ],
     })
