@@ -213,11 +213,6 @@ function runResolverTests(resolver) {
           code: 'import foo from "./jsx/MyUncoolComponent.jsx"',
           options: [{ caseSensitive: false }],
         }),
-        // #1259 issue
-        rest({ // test with explicit flag
-          code: `import foo from "${mismatchedPath}"`,
-          options: [{ caseSensitive: true }],
-        }),
       ],
 
       invalid: [
@@ -230,8 +225,20 @@ function runResolverTests(resolver) {
           options: [{ caseSensitive: true }],
           errors: [`Casing of ./jsx/MyUncoolComponent.jsx does not match the underlying filesystem.`],
         }),
+      ],
+    })
+
+    ruleTester.run('case sensitivity strict', rule, {
+      valid: [
         // #1259 issue
-        rest({ // test with explicit flag
+        rest({ // caseSensitiveStrict is disabled by default
+          code: `import foo from "${mismatchedPath}"`,
+        }),
+      ],
+
+      invalid: [
+        // #1259 issue
+        rest({ // test with enabled caseSensitiveStrict option
           code: `import foo from "${mismatchedPath}"`,
           options: [{ caseSensitiveStrict: true }],
           errors: [`Casing of ${mismatchedPath} does not match the underlying filesystem.`],
